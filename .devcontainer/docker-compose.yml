@@ -1,6 +1,6 @@
-version: '3.8'
+version: "3.8"
 
-services: 
+services:
   app:
     build:
       context: .
@@ -8,29 +8,24 @@ services:
 
     volumes:
       - ../..:/workspaces:cached
+      - mariadb_data:/var/lib/mysql
 
-    # Overrides default command so things don't shut down after the process ends.
-    command: sleep infinity
+    ports:
+      - "80:80"
+      - "3306:3306"
 
-    # Runs app on the same network as the database container, allows "forwardPorts" in devcontainer.json function.
-    network_mode: service:db
-
-    # Use "forwardPorts" in **devcontainer.json** to forward an app port locally. 
-    # (Adding the "ports" property to this file will not forward from a Codespace.)
-
-  db:
-    image: mariadb:10.4
-    restart: unless-stopped
-    volumes:
-      - mariadb-data:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: mariadb
       MYSQL_DATABASE: mariadb
       MYSQL_USER: mariadb
       MYSQL_PASSWORD: mariadb
 
-    # Add "forwardPorts": ["3306"] to **devcontainer.json** to forward MariaDB locally.
-    # (Adding the "ports" property to this file will not forward from a Codespace.)
-  
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp:unconfined
+
+    command: /usr/local/bin/start.sh
+
 volumes:
-  mariadb-data:
+  mariadb_data:
